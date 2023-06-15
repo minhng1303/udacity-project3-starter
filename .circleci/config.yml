@@ -77,8 +77,6 @@ jobs:
     steps:
       # This command will pull all of the files into a directory called project which can be found at ~/project.
       - checkout
-      # Export environment variable
-      - exports
       - restore_cache:
           keys: [frontend-build]
       - run:
@@ -87,6 +85,10 @@ jobs:
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/frontend")
             npm install
             npm run test
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-test
+
                 
   test-backend:
     docker:
@@ -94,8 +96,6 @@ jobs:
     steps:
       # This command will pull all of the files into a directory called project which can be found at ~/project.
       - checkout
-      # Export environment variable
-      - exports
       - restore_cache:
           keys: [backend-build]
       - run:
@@ -104,6 +104,9 @@ jobs:
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/backend")
             npm install
             npm run test
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
             
   # scan-frontend:
   #   docker:
