@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@3.1.5
   python: circleci/python@2.1.1
-  
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -250,23 +250,23 @@ jobs:
   #     # Here's where you will add some code to rollback on failure  
 
   # cleanup:
-    docker:
+    # docker:
       # Docker image here
-    steps:
-      # Checkout code from git
-      - run:
-          name: Get old stack workflow id
-          command: |
-            # your code here
-            export OldWorkflowID="the id here"
-            export STACKS=[] #put the list of stacks here
-      - run:
-          name: Remove old stacks and files
-          command: |
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-            then
-              # your code here
-            fi
+    # steps:
+    #   # Checkout code from git
+    #   - run:
+    #       name: Get old stack workflow id
+    #       command: |
+    #         # your code here
+    #         export OldWorkflowID="the id here"
+    #         export STACKS=[] #put the list of stacks here
+    #   - run:
+    #       name: Remove old stacks and files
+    #       command: |
+    #         if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+    #         then
+    #           # your code here
+    #         fi
             
 
 workflows:
