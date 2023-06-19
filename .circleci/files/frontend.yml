@@ -27,6 +27,11 @@ Resources:
           Principal: '*'
           Action: s3:GetObject
           Resource: !Join ['', ['arn:aws:s3:::', !Ref 'WebsiteBucket', /*]]
+      PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+      OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
 
 Outputs:
   WebsiteURL:
