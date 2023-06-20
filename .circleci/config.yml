@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@3.1.5
   python: circleci/python@2.1.1
+  slack: circleci/slack@4.10.1
 
 commands:
   destroy-environment:
@@ -207,7 +208,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-              apk add --update tar gzip ansible
+              # apk add --update tar gzip ansible
               pip install awscli
               pip install ansible
 #              pip install --upgrade pip
