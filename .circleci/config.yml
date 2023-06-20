@@ -128,7 +128,8 @@ jobs:
           command: |
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/frontend")
             npm install
-            npm audit fix --force
+            npm update loader-utils --depth 2
+            npm audit fix --audit-level=critical
             ## If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
             npm audit --audit-level=critical
 
@@ -147,7 +148,8 @@ jobs:
           command: |
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/backend")
             npm install
-            npm audit fix --force
+            npm update loader-utils --depth 2
+            npm audit fix --audit-level=critical
             ## If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
             npm audit --audit-level=critical
 
