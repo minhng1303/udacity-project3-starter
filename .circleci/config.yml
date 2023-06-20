@@ -149,6 +149,11 @@ jobs:
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/backend")
             npm install
             npm update loader-utils --depth 2
+            npm update mkdirp --depth 2
+            npm update set-value --depth 8
+            npm update union-value --depth 8
+            npm update mixin-deep --depth 7
+            
             npm audit fix --force
             ## If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
             npm audit --audit-level=critical
