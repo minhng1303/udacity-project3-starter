@@ -198,9 +198,9 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
-    docker:
-      # Docker image here that supports Ansible
-      - image: python:3.7-alpine3.11
+    executor:
+      name: python/default
+      tag: "3.11.2"
     steps:
       # Checkout code from git
       - checkout       
@@ -210,21 +210,15 @@ jobs:
       # attach workspace
       - attach_workspace:
           at: ~/
-
-      - run:
-          name: Install dependencies
-          command: |
-              # apk add --update tar gzip ansible
-              pip install awscli
-              pip install ansible
-
+      - python/install-packages:
+          args: ansible
       - run:
           name: Configure server
           command: |
-            cd .circleci/ansible
             cat ./.circleci/ansible/inventory.txt
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml 
-      - destroy-environment    
+      - destroy-environment     
 
   run-migrations:
     docker:
@@ -249,43 +243,89 @@ jobs:
       - destroy-environment
       - revert-migrations   
 
-  # deploy-frontend:
-  #   docker:
-  #     # Docker image here that supports AWS CLI
-  #   steps:
-  #     # Checkout code from git
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           # your code here
-  #     - run:
-  #         name: Get backend url
-  #         command: |
-  #           # your code here
-  #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "${API_URL}"
-  #     - run:
-  #         name: Deploy frontend objects
-  #         command: |
-  #           # your code here
-  #     # Here's where you will add some code to rollback on failure      
-                    
-  # deploy-backend:
+  deploy-frontend:
     docker:
-      # Docker image here that supports Ansible
+      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
     steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
-      # attach workspace
+      # This command will pull all of the files into a directory called project which can be found at ~/project.
+      - checkout
+      # Export environment variable
+      - exports
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Install dependencies
+          name: Get backend url
           command: |
             # your code here
+            export BACKEND_PUBLIC_IP=$(aws --region us-east-1 ec2 describe-instances 
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            --query 'Reservations[*].Instances[*].PublicDnsName' 
+            --output text)
+            export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
+            echo "${API_URL}"
+            echo API_URL="http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+          
+      # Here's where you will add some code to rollback on failure
+      # Rollback if fail
+      - revert-migrations
+      - destroy-environment      
+                    
+  deploy-backend:
+    docker:
+      - image: cimg/python:3.7-node
+    steps:
+      # Checkout code from git
+      - checkout       
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["6d:b4:0f:49:22:01:69:31:38:81:ce:15:16:be:a0:d3"]
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install aws dependencies
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+#              pip install --upgrade
       - run:
           name: Deploy backend
           command: |
             # your code here
+            cd backend # echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml -v
       # Here's where you will add some code to rollback on failure  
+      - revert-migrations
+      - destroy-environment     
 
   # smoke-test:
   #   docker:
