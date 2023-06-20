@@ -127,9 +127,9 @@ jobs:
           name: "Scan frontend"
           command: |
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/frontend")
+            npm audit fix --audit-level=critical --force
             # npm install oauth-sign@^0.9.0
             # If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
-            npm audit fix --force
             npm audit --audit-level=critical
 
   scan-backend:
@@ -146,8 +146,8 @@ jobs:
           name: "Scan backend"
           command: |
             cd $(eval echo "$CIRCLE_WORKING_DIRECTORY/$PROJECT_ROOT_DIR/backend")
+            npm audit fix --audit-level=critical --force
             # If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
-            npm audit fix --force
             npm audit --audit-level=critical
 
   deploy-infrastructure:
