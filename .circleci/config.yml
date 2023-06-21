@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@3.1.5
   python: circleci/python@2.1.1
-  slack: circleci/slack@4.10.1
 
 commands:
   destroy-environment:
@@ -238,7 +237,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-                curl https://kvdb.io/C1wzi49E2RGprr7zo4bE6W/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+                curl https://kvdb.io/C1wzi49E2RGprr7zo4bE6W/migration_${CIRCLE_WORKFLOW_ID:0:7}  -insecure '1'
             fi
       - destroy-environment
       - revert-migrations   
