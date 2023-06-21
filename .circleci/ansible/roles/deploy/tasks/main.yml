@@ -1,24 +1,24 @@
-- name: "Creates directory"
-  file:
-    path: "~/server"
-    state: "directory"
-    mode: 0755
-
-- name: "Copy compressed backend folder"
-  copy:
-    src: "artifact.tar.gz"
-    dest: "~/server/artifact.tar.gz"
-
-- name: "Extract backend"
+- name: extract artifact
+  become: yes
   unarchive:
-    remote_src: yes
-    src: "~/server/artifact.tar.gz"
-    dest: "~/server"
+    src: files/artifact.tar.gz
+    dest: .
+    
+- name: start app
+  become: yes
+  shell: |
+    npm install
+    pm2 stop all
+    pm2 start npm --name "udapeople-backend" -- run start
+    
+- name: "Set pm2 start as service"
+  become: yes
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
 
-- name: "Run the web server"
-  shell:
-    cmd: |
-      cd ~/server
-      npm install
-      pm2 stop default
-      pm2 start npm -- start --wait-ready
+- name: check pm2 status
+  become: yes
+  shell: |
+    pm2 describe "udapeople-backend"
+  register: command_output_npm
+- debug: var=command_output_npm.stdout_lines
