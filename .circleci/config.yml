@@ -327,42 +327,8 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -v
       # Here's where you will add some code to rollback on failure  
-      - revert-migrations
-      - destroy-environment     
-    docker:
-      - image: cimg/python:3.7-node
-    steps:
-      # Checkout code from git
-      - checkout       
-      # Add ssh keys with fingerprint
-      - add_ssh_keys:
-          fingerprints: ["42:b1:57:c8:30:71:6b:f0:dd:4e:d3:ee:77:ed:d2:e5"]
-      # attach workspace
-      - attach_workspace:
-          at: ~/
-
-      - run:
-          name: Install aws dependencies
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-      - run:
-          name: Install Ansible
-          command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
-      - run:
-          name: Deploy backend
-          working_directory: ./.circleci/ansible
-          command: |
-            cat inventory
-            ansible-playbook -i inventory deploy-backend.yaml -vv
-      # Here's where you will add some code to rollback on failure  
-      - revert-migrations
-      - destroy-environment     
+      # - revert-migrations
+      # - destroy-environment       
 
   smoke-test:
     docker:
